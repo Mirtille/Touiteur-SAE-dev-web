@@ -216,3 +216,72 @@ ALTER TABLE `Evaluation` ADD CONSTRAINT `fk_eval_user` FOREIGN KEY (`id_user`) R
 ALTER TABLE `Evaluation` ADD CONSTRAINT `fk_eval_touite` FOREIGN KEY (`id_touite`) REFERENCES `Touite` (`id_touite`) ON DELETE CASCADE;
 
 SET foreign_key_checks = 1;
+
+
+
+
+//Script PLSQl :
+
+Mettre à jour le nombre de touites pour un utilisateur : 
+
+
+DELIMITER //
+
+CREATE TRIGGER trg_increment_nb_touites
+AFTER INSERT ON Touite
+FOR EACH ROW
+BEGIN
+    UPDATE Utilisateur
+    SET nb_touites = nb_touites + 1
+    WHERE id_user = NEW.id_auteur;
+END //
+
+DELIMITER ;
+
+Empêcher un utilisateur de se suivre : 
+
+
+DELIMITER //
+
+CREATE TRIGGER trg_verif_suivi
+BEFORE INSERT ON UserSuivi
+FOR EACH ROW
+BEGIN
+    DECLARE email_suiveur VARCHAR(128);
+    DECLARE email_suivi VARCHAR(128);
+
+    -- Vérifier que l'utilisateur ne se suit pas lui-même
+    IF NEW.id_suiveur = NEW.id_suivi THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Un utilisateur ne peut pas se suivre lui-même';
+    END IF;
+
+    -- Récupérer les emails des deux utilisateurs
+    SELECT email_user INTO email_suiveur
+    FROM Utilisateur
+    WHERE id_user = NEW.id_suiveur;
+
+    SELECT email_user INTO email_suivi
+    FROM Utilisateur
+    WHERE id_user = NEW.id_suivi;
+
+    -- Vérifier que les emails sont différents
+    IF LOWER(TRIM(email_suiveur)) = LOWER(TRIM(email_suivi)) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Un utilisateur ne peut pas suivre quelqu'un ayant le même email.';
+    END IF;
+
+END //
+
+DELIMITER ;
+
+
+
+
+
+
+
+
+
+
+
