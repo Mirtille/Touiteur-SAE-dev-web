@@ -1,0 +1,26 @@
+
+--- Dictionnaire des donnees : Touiteur ---
+
+id_user : INT, identifiant unique de l'utilisateur (cle primaire, auto_increment)
+nom_user : VARCHAR(50), nom de famille de l'utilisateur, NOT NULL
+prenom_user : VARCHAR(50), prenom de l'utilisateur, NOT NULL
+email_user : VARCHAR(128), adresse mail de l'utilisateur, UNIQUE, NOT NULL
+mdp_user : VARCHAR(255), mot de passe de compte hache, NOT NULL
+role_user : VARCHAR(20), role du compte (standard ou admin), DEFAULT 'standard', NOT NULL
+nb_touites : INT, compteur de touites publies par l'utilisateur, DEFAULT 0, CHECK (nb_touites >= 0)
+
+id_touite : INT, identifiant unique du touite (cle primaire, auto_increment)
+texte_touite : VARCHAR(235), texte du touite, NOT NULL
+date_publi : DATETIME, date et heure de publication du touite, NOT NULL, DEFAULT CURRENT_TIMESTAMP
+score_touite : INT, total des votes likes moins dislikes, DEFAULT 0
+
+id_tag : INT, identifiant unique d'un tag (cle primaire, auto_increment)
+libelle_tag : VARCHAR(50), libelle du mot-cle sans le caractere #, UNIQUE, NOT NULL
+desc_tag : VARCHAR(255), courte description facultative du sujet du tag, DEFAULT NULL
+
+id_img : INT, identifiant unique de l'image (cle primaire, auto_increment)
+chemin_img : VARCHAR(255), chemin du fichier image stocke sur le serveur, NOT NULL
+desc_img : VARCHAR(255), description ou texte alternatif pour l'image, DEFAULT NULL
+
+date_suivi : DATETIME, date et heure ou un utilisateur commence a suivre un autre utilisateur, NOT NULL, DEFAULT CURRENT_TIMESTAMP
+valeur_eval : TINYINT, note attribuee a un touite (+1 pour like ou -1 pour dislike), NOT NULL, CHECK (valeur_eval IN (-1, 1))
