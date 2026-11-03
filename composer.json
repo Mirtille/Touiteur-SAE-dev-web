@@ -1,0 +1,17 @@
+{
+  "name": "iutnc/touiteur",
+  "description": "Application web securisee Touiteur - SAE BUT Informatique S3",
+  "type": "project",
+  "authors": [
+    {
+      "name": "Groupe SAE",
+      "email": "etudiant@univ-lorraine.fr"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "iutnc\\touiteur\\": "src/classes/"
+    }
+  },
+  "require": {}
+}

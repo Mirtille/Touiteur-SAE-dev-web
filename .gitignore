@@ -1,0 +1,7 @@
+/vendor/
+config.db.ini
+/uploads/*
+!/uploads/.gitkeep
+.env
+*.log
+.DS_Store
