@@ -35,10 +35,46 @@ id_tag -> libelle_tag, desc_tag
 
 id_img -> chemin_img, desc_img, id_touite
 
-(id_suiveur, id_suivi)→ -> ate_suivi
+(id_suiveur, id_suivi)→ -> date_suivi
 
 (id_user, id_touite) -> valeur_eval
 
 (id_user, id_tag) // Clé primaire pour Abonnement tag
 
 (id_touite, id_tag) // Clé primaire pour la relation Touite-Tag
+
+--- Schema relationnel ---
+
+Utilisateur (id_user, nom_user, prenom_user, email_user, mdp_user, role_user, nb_touites)
+    Cle primaire : id_user
+
+Touite (id_touite, texte_touite, date_publi, score_touite, #id_auteur)
+    Cle primaire : id_touite
+    Cle etrangere : #id_auteur reference Utilisateur(id_user)
+
+Image (id_img, chemin_img, desc_img, #id_touite)
+    Cle primaire : id_img
+    Cle etrangere : #id_touite reference Touite(id_touite)
+
+Tag (id_tag, libelle_tag, desc_tag)
+    Cle primaire : id_tag
+
+Touite2Tag (#id_touite, #id_tag)
+    Cle primaire : (#id_touite, #id_tag)
+    Cle etrangere : #id_touite reference Touite(id_touite)
+    Cle etrangere : #id_tag reference Tag(id_tag)
+
+UserSuivi (#id_suiveur, #id_suivi, date_suivi)
+    Cle primaire : (#id_suiveur, #id_suivi)
+    Cle etrangere : #id_suiveur reference Utilisateur(id_user)
+    Cle etrangere : #id_suivi reference Utilisateur(id_user)
+
+UserTag (#id_user, #id_tag)
+    Cle primaire : (#id_user, #id_tag)
+    Cle etrangere : #id_user reference Utilisateur(id_user)
+    Cle etrangere : #id_tag reference Tag(id_tag)
+
+Evaluation (#id_user, #id_touite, valeur_eval)
+    Cle primaire : (#id_user, #id_touite)
+    Cle etrangere : #id_user reference Utilisateur(id_user)
+    Cle etrangere : #id_touite reference Touite(id_touite)
