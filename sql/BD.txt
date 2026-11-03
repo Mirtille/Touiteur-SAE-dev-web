@@ -78,3 +78,141 @@ Evaluation (#id_user, #id_touite, valeur_eval)
     Cle primaire : (#id_user, #id_touite)
     Cle etrangere : #id_user reference Utilisateur(id_user)
     Cle etrangere : #id_touite reference Touite(id_touite)
+
+
+--- script SQL ---
+
+SET NAMES utf8mb4;
+SET foreign_key_checks = 0;
+
+DROP TABLE IF EXISTS `Utilisateur`;
+CREATE TABLE `Utilisateur` (
+  `id_user` int(11) NOT NULL AUTO_INCREMENT,
+  `nom_user` varchar(50) NOT NULL,
+  `prenom_user` varchar(50) NOT NULL,
+  `email_user` varchar(128) NOT NULL,
+  `mdp_user` varchar(255) NOT NULL,
+  `role_user` varchar(20) NOT NULL DEFAULT 'standard',
+  `nb_touites` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id_user`),
+  UNIQUE KEY `email_user` (`email_user`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `Utilisateur` (`id_user`, `nom_user`, `prenom_user`, `email_user`, `mdp_user`, `role_user`, `nb_touites`) VALUES
+(1, 'Dupont', 'Alice', 'alice@touiteur.fr', '$2y$10$e8V3gVzVfXvFwOq8M9T5iOaO6tK.4i3nZ6s0q1u2x3y4z5a6b7c8d', 'admin', 2),
+(2, 'Martin', 'Bob', 'bob@touiteur.fr', '$2y$10$e8V3gVzVfXvFwOq8M9T5iOaO6tK.4i3nZ6s0q1u2x3y4z5a6b7c8d', 'standard', 1),
+(3, 'Durand', 'Charlie', 'charlie@touiteur.fr', '$2y$10$e8V3gVzVfXvFwOq8M9T5iOaO6tK.4i3nZ6s0q1u2x3y4z5a6b7c8d', 'standard', 1);
+
+DROP TABLE IF EXISTS `Touite`;
+CREATE TABLE `Touite` (
+  `id_touite` int(11) NOT NULL AUTO_INCREMENT,
+  `texte_touite` varchar(235) NOT NULL,
+  `date_publi` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `score_touite` int(11) NOT NULL DEFAULT 0,
+  `id_auteur` int(11) NOT NULL,
+  PRIMARY KEY (`id_touite`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `Touite` (`id_touite`, `texte_touite`, `date_publi`, `score_touite`, `id_auteur`) VALUES
+(1, 'Bienvenue sur Touiteur ! Premier message sur le reseau #web.', '2026-11-01 10:00:00', 2, 1),
+(2, 'Le dev web avec PHP objet c est super propre #php #web', '2026-11-01 11:30:00', 1, 2),
+(3, 'Voici notre mascotte pour le projet de SAE #iut', '2026-11-01 14:15:00', 0, 1),
+(4, 'Session de travail a la bibliotheque #iut #php', '2026-11-02 09:00:00', 2, 3);
+
+DROP TABLE IF EXISTS `Image`;
+CREATE TABLE `Image` (
+  `id_img` int(11) NOT NULL AUTO_INCREMENT,
+  `chemin_img` varchar(255) NOT NULL,
+  `desc_img` varchar(255) DEFAULT NULL,
+  `id_touite` int(11) NOT NULL,
+  PRIMARY KEY (`id_img`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `Image` (`id_img`, `chemin_img`, `desc_img`, `id_touite`) VALUES
+(1, 'uploads/mascotte.jpg', 'Photo de la mascotte', 3),
+(2, 'uploads/campus.jpg', 'Photo de la BU', 4);
+
+DROP TABLE IF EXISTS `Tag`;
+CREATE TABLE `Tag` (
+  `id_tag` int(11) NOT NULL AUTO_INCREMENT,
+  `libelle_tag` varchar(50) NOT NULL,
+  `desc_tag` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id_tag`),
+  UNIQUE KEY `libelle_tag` (`libelle_tag`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `Tag` (`id_tag`, `libelle_tag`, `desc_tag`) VALUES
+(1, 'web', 'Technologies du web'),
+(2, 'php', 'Discussions PHP et POO'),
+(3, 'iut', 'La vie et les cours a l IUT');
+
+DROP TABLE IF EXISTS `Touite2Tag`;
+CREATE TABLE `Touite2Tag` (
+  `id_touite` int(11) NOT NULL,
+  `id_tag` int(11) NOT NULL,
+  PRIMARY KEY (`id_touite`, `id_tag`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `Touite2Tag` (`id_touite`, `id_tag`) VALUES
+(1, 1),
+(2, 1),
+(2, 2),
+(3, 3),
+(4, 2),
+(4, 3);
+
+DROP TABLE IF EXISTS `UserSuivi`;
+CREATE TABLE `UserSuivi` (
+  `id_suiveur` int(11) NOT NULL,
+  `id_suivi` int(11) NOT NULL,
+  `date_suivi` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_suiveur`, `id_suivi`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `UserSuivi` (`id_suiveur`, `id_suivi`, `date_suivi`) VALUES
+(2, 1, '2026-11-01 10:05:00'),
+(3, 1, '2026-11-01 10:10:00'),
+(1, 2, '2026-11-01 12:00:00');
+
+DROP TABLE IF EXISTS `UserTag`;
+CREATE TABLE `UserTag` (
+  `id_user` int(11) NOT NULL,
+  `id_tag` int(11) NOT NULL,
+  PRIMARY KEY (`id_user`, `id_tag`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `UserTag` (`id_user`, `id_tag`) VALUES
+(1, 2),
+(2, 3);
+
+DROP TABLE IF EXISTS `Evaluation`;
+CREATE TABLE `Evaluation` (
+  `id_user` int(11) NOT NULL,
+  `id_touite` int(11) NOT NULL,
+  `valeur_eval` tinyint(1) NOT NULL,
+  PRIMARY KEY (`id_user`, `id_touite`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `Evaluation` (`id_user`, `id_touite`, `valeur_eval`) VALUES
+(2, 1, 1),
+(3, 1, 1),
+(1, 2, 1),
+(2, 4, 1),
+(1, 4, 1);
+
+ALTER TABLE `Touite` ADD CONSTRAINT `fk_touite_auteur` FOREIGN KEY (`id_auteur`) REFERENCES `Utilisateur` (`id_user`) ON DELETE CASCADE;
+ALTER TABLE `Image` ADD CONSTRAINT `fk_image_touite` FOREIGN KEY (`id_touite`) REFERENCES `Touite` (`id_touite`) ON DELETE CASCADE;
+
+ALTER TABLE `Touite2Tag` ADD CONSTRAINT `fk_t2t_touite` FOREIGN KEY (`id_touite`) REFERENCES `Touite` (`id_touite`) ON DELETE CASCADE;
+ALTER TABLE `Touite2Tag` ADD CONSTRAINT `fk_t2t_tag` FOREIGN KEY (`id_tag`) REFERENCES `Tag` (`id_tag`) ON DELETE CASCADE;
+
+ALTER TABLE `UserSuivi` ADD CONSTRAINT `fk_suivi_suiveur` FOREIGN KEY (`id_suiveur`) REFERENCES `Utilisateur` (`id_user`) ON DELETE CASCADE;
+ALTER TABLE `UserSuivi` ADD CONSTRAINT `fk_suivi_suivi` FOREIGN KEY (`id_suivi`) REFERENCES `Utilisateur` (`id_user`) ON DELETE CASCADE;
+
+ALTER TABLE `UserTag` ADD CONSTRAINT `fk_utag_user` FOREIGN KEY (`id_user`) REFERENCES `Utilisateur` (`id_user`) ON DELETE CASCADE;
+ALTER TABLE `UserTag` ADD CONSTRAINT `fk_utag_tag` FOREIGN KEY (`id_tag`) REFERENCES `Tag` (`id_tag`) ON DELETE CASCADE;
+
+ALTER TABLE `Evaluation` ADD CONSTRAINT `fk_eval_user` FOREIGN KEY (`id_user`) REFERENCES `Utilisateur` (`id_user`) ON DELETE CASCADE;
+ALTER TABLE `Evaluation` ADD CONSTRAINT `fk_eval_touite` FOREIGN KEY (`id_touite`) REFERENCES `Touite` (`id_touite`) ON DELETE CASCADE;
+
+SET foreign_key_checks = 1;
