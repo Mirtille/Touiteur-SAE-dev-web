@@ -24,3 +24,21 @@ desc_img : VARCHAR(255), description ou texte alternatif pour l'image, DEFAULT N
 
 date_suivi : DATETIME, date et heure ou un utilisateur commence a suivre un autre utilisateur, NOT NULL, DEFAULT CURRENT_TIMESTAMP
 valeur_eval : TINYINT, note attribuee a un touite (+1 pour like ou -1 pour dislike), NOT NULL, CHECK (valeur_eval IN (-1, 1))
+
+--- Dépendances fonctionnelles : ---
+
+id_user -> nom_user, prenom_user, email_user, mdp_user, role_user, nb_touites
+
+id_touite -> texte_touite, date_publi, score_touite, id_auteur
+
+id_tag -> libelle_tag, desc_tag
+
+id_img -> chemin_img, desc_img, id_touite
+
+(id_suiveur, id_suivi)→ -> ate_suivi
+
+(id_user, id_touite) -> valeur_eval
+
+(id_user, id_tag) // Clé primaire pour Abonnement tag
+
+(id_touite, id_tag) // Clé primaire pour la relation Touite-Tag
