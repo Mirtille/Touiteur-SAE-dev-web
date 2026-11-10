@@ -8,7 +8,7 @@ class TouiteRepository {
     private PDO $pdo;
 
     public function __construct() {
-        $this->pdo = ConnectionFactory::getConnection();
+        $this->pdo = Connexion::getConnection();
     }
 
     public function getDerniersTouites(): array {

@@ -4,7 +4,7 @@ namespace iutnc\touiteur\repository;
 use PDO;
 use Exception;
 
-class Connection {
+class Connexion {
     private static ?PDO $pdo = null;
 
     public static function setConfig(string $file): void {
