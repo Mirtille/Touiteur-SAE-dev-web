@@ -1,6 +1,6 @@
 <?php
 
-namespace Touiteur\Model;
+namespace iutnc\touiteur\touiteur;
 
 class Utilisateur {
     private ?int $id;
