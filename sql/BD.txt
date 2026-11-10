@@ -1,0 +1,312 @@
+/*
+-- Dictionnaire des donnees : Touiteur 
+
+id_user : INT, identifiant unique de l'utilisateur (cle primaire, auto_increment)
+nom_user : VARCHAR(50), nom de famille de l'utilisateur, NOT NULL
+prenom_user : VARCHAR(50), prenom de l'utilisateur, NOT NULL
+email_user : VARCHAR(128), adresse mail de l'utilisateur, UNIQUE, NOT NULL
+mdp_user : VARCHAR(255), mot de passe de compte hache, NOT NULL
+role_user : VARCHAR(20), role du compte (standard ou admin), DEFAULT 'standard', NOT NULL
+nb_touites : INT, compteur de touites publies par l'utilisateur, DEFAULT 0, CHECK (nb_touites >= 0)
+
+id_touite : INT, identifiant unique du touite (cle primaire, auto_increment)
+texte_touite : VARCHAR(235), texte du touite, NOT NULL
+date_publi : DATETIME, date et heure de publication du touite, NOT NULL, DEFAULT CURRENT_TIMESTAMP
+score_touite : INT, total des votes likes moins dislikes, DEFAULT 0
+
+id_tag : INT, identifiant unique d'un tag (cle primaire, auto_increment)
+libelle_tag : VARCHAR(50), libelle du mot-cle sans le caractere #, UNIQUE, NOT NULL
+desc_tag : VARCHAR(255), courte description facultative du sujet du tag, DEFAULT NULL
+
+id_img : INT, identifiant unique de l'image (cle primaire, auto_increment)
+chemin_img : VARCHAR(255), chemin du fichier image stocke sur le serveur, NOT NULL
+desc_img : VARCHAR(255), description ou texte alternatif pour l'image, DEFAULT NULL
+
+date_suivi : DATETIME, date et heure ou un utilisateur commence a suivre un autre utilisateur, NOT NULL, DEFAULT CURRENT_TIMESTAMP
+valeur_eval : TINYINT, note attribuee a un touite (+1 pour like ou -1 pour dislike), NOT NULL, CHECK (valeur_eval IN (-1, 1))
+
+-- Dépendances fonctionnelles : 
+
+id_user -> nom_user, prenom_user, email_user, mdp_user, role_user, nb_touites
+
+id_touite -> texte_touite, date_publi, score_touite, id_auteur
+
+id_tag -> libelle_tag, desc_tag
+
+id_img -> chemin_img, desc_img, id_touite
+
+(id_suiveur, id_suivi)→ -> date_suivi
+
+(id_user, id_touite) -> valeur_eval
+
+(id_user, id_tag) // Clé primaire pour Abonnement tag
+
+(id_touite, id_tag) // Clé primaire pour la relation Touite-Tag
+
+-- Schema relationnel 
+
+Utilisateur (id_user, nom_user, prenom_user, email_user, mdp_user, role_user, nb_touites)
+    Cle primaire : id_user
+
+Touite (id_touite, texte_touite, date_publi, score_touite, #id_auteur)
+    Cle primaire : id_touite
+    Cle etrangere : #id_auteur reference Utilisateur(id_user)
+
+Image (id_img, chemin_img, desc_img, #id_touite)
+    Cle primaire : id_img
+    Cle etrangere : #id_touite reference Touite(id_touite)
+
+Tag (id_tag, libelle_tag, desc_tag)
+    Cle primaire : id_tag
+
+Touite2Tag (#id_touite, #id_tag)
+    Cle primaire : (#id_touite, #id_tag)
+    Cle etrangere : #id_touite reference Touite(id_touite)
+    Cle etrangere : #id_tag reference Tag(id_tag)
+
+UserSuivi (#id_suiveur, #id_suivi, date_suivi)
+    Cle primaire : (#id_suiveur, #id_suivi)
+    Cle etrangere : #id_suiveur reference Utilisateur(id_user)
+    Cle etrangere : #id_suivi reference Utilisateur(id_user)
+
+UserTag (#id_user, #id_tag)
+    Cle primaire : (#id_user, #id_tag)
+    Cle etrangere : #id_user reference Utilisateur(id_user)
+    Cle etrangere : #id_tag reference Tag(id_tag)
+
+Evaluation (#id_user, #id_touite, valeur_eval)
+    Cle primaire : (#id_user, #id_touite)
+    Cle etrangere : #id_user reference Utilisateur(id_user)
+    Cle etrangere : #id_touite reference Touite(id_touite)
+
+
+-- script SQL 
+*/
+SET NAMES utf8mb4;
+SET foreign_key_checks = 0;
+
+DROP TABLE IF EXISTS `Utilisateur`;
+CREATE TABLE `Utilisateur` (
+  `id_user` int(11) NOT NULL AUTO_INCREMENT,
+  `nom_user` varchar(50) NOT NULL,
+  `prenom_user` varchar(50) NOT NULL,
+  `email_user` varchar(128) NOT NULL,
+  `mdp_user` varchar(255) NOT NULL,
+  `role_user` varchar(20) NOT NULL DEFAULT 'standard',
+  `nb_touites` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id_user`),
+  UNIQUE KEY `email_user` (`email_user`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `Utilisateur` (`id_user`, `nom_user`, `prenom_user`, `email_user`, `mdp_user`, `role_user`, `nb_touites`) VALUES
+(1, 'Dupont', 'Alice', 'alice@touiteur.fr', 'motdepasse1', 'admin', 2),
+(2, 'Martin', 'Bob', 'bob@touiteur.fr', 'motdepasse2', 'standard', 1),
+(3, 'Durand', 'Charlie', 'charlie@touiteur.fr', 'motdepasse3', 'standard', 1);
+
+DROP TABLE IF EXISTS `Touite`;
+CREATE TABLE `Touite` (
+  `id_touite` int(11) NOT NULL AUTO_INCREMENT,
+  `texte_touite` varchar(235) NOT NULL,
+  `date_publi` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `score_touite` int(11) NOT NULL DEFAULT 0,
+  `id_auteur` int(11) NOT NULL,
+  PRIMARY KEY (`id_touite`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `Touite` (`id_touite`, `texte_touite`, `date_publi`, `score_touite`, `id_auteur`) VALUES
+(1, 'Bienvenue sur Touiteur ! Premier message sur le reseau #web.', '2026-11-01 10:00:00', 2, 1),
+(2, 'J''aime le dev web #php #web', '2026-11-01 11:30:00', 1, 2),
+(3, 'Nous somme en projet de SAE #iut', '2026-11-01 14:15:00', 0, 1),
+(4, 'encore 8h 18h #iut #php', '2026-11-02 09:00:00', 2, 3);
+
+DROP TABLE IF EXISTS `Image`;
+CREATE TABLE `Image` (
+  `id_img` int(11) NOT NULL AUTO_INCREMENT,
+  `chemin_img` varchar(255) NOT NULL,
+  `desc_img` varchar(255) DEFAULT NULL,
+  `id_touite` int(11) NOT NULL,
+  PRIMARY KEY (`id_img`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `Image` (`id_img`, `chemin_img`, `desc_img`, `id_touite`) VALUES
+(1, 'uploads/chat.jpg', 'chat', 3),
+(2, 'uploads/iut.jpg', 'photo batiment', 4);
+
+DROP TABLE IF EXISTS `Tag`;
+CREATE TABLE `Tag` (
+  `id_tag` int(11) NOT NULL AUTO_INCREMENT,
+  `libelle_tag` varchar(50) NOT NULL,
+  `desc_tag` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id_tag`),
+  UNIQUE KEY `libelle_tag` (`libelle_tag`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `Tag` (`id_tag`, `libelle_tag`, `desc_tag`) VALUES
+(1, 'web', 'tag web'),
+(2, 'php', 'tag php'),
+(3, 'iut', 'tag cours');
+
+DROP TABLE IF EXISTS `Touite2Tag`;
+CREATE TABLE `Touite2Tag` (
+  `id_touite` int(11) NOT NULL,
+  `id_tag` int(11) NOT NULL,
+  PRIMARY KEY (`id_touite`, `id_tag`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `Touite2Tag` (`id_touite`, `id_tag`) VALUES
+(1, 1),
+(2, 1),
+(2, 2),
+(3, 3),
+(4, 2),
+(4, 3);
+
+DROP TABLE IF EXISTS `UserSuivi`;
+CREATE TABLE `UserSuivi` (
+  `id_suiveur` int(11) NOT NULL,
+  `id_suivi` int(11) NOT NULL,
+  `date_suivi` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_suiveur`, `id_suivi`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `UserSuivi` (`id_suiveur`, `id_suivi`, `date_suivi`) VALUES
+(2, 1, '2026-11-01 10:05:00'),
+(3, 1, '2026-11-01 10:10:00'),
+(1, 2, '2026-11-01 12:00:00');
+
+DROP TABLE IF EXISTS `UserTag`;
+CREATE TABLE `UserTag` (
+  `id_user` int(11) NOT NULL,
+  `id_tag` int(11) NOT NULL,
+  PRIMARY KEY (`id_user`, `id_tag`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `UserTag` (`id_user`, `id_tag`) VALUES
+(1, 2),
+(2, 3);
+
+DROP TABLE IF EXISTS `Evaluation`;
+CREATE TABLE `Evaluation` (
+  `id_user` int(11) NOT NULL,
+  `id_touite` int(11) NOT NULL,
+  `valeur_eval` tinyint(1) NOT NULL,
+  PRIMARY KEY (`id_user`, `id_touite`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `Evaluation` (`id_user`, `id_touite`, `valeur_eval`) VALUES
+(2, 1, 1),
+(3, 1, 1),
+(1, 2, 1),
+(2, 4, 1),
+(1, 4, 1);
+
+ALTER TABLE `Touite` ADD CONSTRAINT `fk_touite_auteur` FOREIGN KEY (`id_auteur`) REFERENCES `Utilisateur` (`id_user`) ON DELETE CASCADE;
+ALTER TABLE `Image` ADD CONSTRAINT `fk_image_touite` FOREIGN KEY (`id_touite`) REFERENCES `Touite` (`id_touite`) ON DELETE CASCADE;
+
+ALTER TABLE `Touite2Tag` ADD CONSTRAINT `fk_t2t_touite` FOREIGN KEY (`id_touite`) REFERENCES `Touite` (`id_touite`) ON DELETE CASCADE;
+ALTER TABLE `Touite2Tag` ADD CONSTRAINT `fk_t2t_tag` FOREIGN KEY (`id_tag`) REFERENCES `Tag` (`id_tag`) ON DELETE CASCADE;
+
+ALTER TABLE `UserSuivi` ADD CONSTRAINT `fk_suivi_suiveur` FOREIGN KEY (`id_suiveur`) REFERENCES `Utilisateur` (`id_user`) ON DELETE CASCADE;
+ALTER TABLE `UserSuivi` ADD CONSTRAINT `fk_suivi_suivi` FOREIGN KEY (`id_suivi`) REFERENCES `Utilisateur` (`id_user`) ON DELETE CASCADE;
+
+ALTER TABLE `UserTag` ADD CONSTRAINT `fk_utag_user` FOREIGN KEY (`id_user`) REFERENCES `Utilisateur` (`id_user`) ON DELETE CASCADE;
+ALTER TABLE `UserTag` ADD CONSTRAINT `fk_utag_tag` FOREIGN KEY (`id_tag`) REFERENCES `Tag` (`id_tag`) ON DELETE CASCADE;
+
+ALTER TABLE `Evaluation` ADD CONSTRAINT `fk_eval_user` FOREIGN KEY (`id_user`) REFERENCES `Utilisateur` (`id_user`) ON DELETE CASCADE;
+ALTER TABLE `Evaluation` ADD CONSTRAINT `fk_eval_touite` FOREIGN KEY (`id_touite`) REFERENCES `Touite` (`id_touite`) ON DELETE CASCADE;
+
+SET foreign_key_checks = 1;
+
+
+
+
+-- Script PLSQl :
+
+-- Mettre à jour le nombre de touites pour un utilisateur : 
+
+
+DELIMITER //
+
+CREATE TRIGGER trg_increment_nb_touites
+AFTER INSERT ON Touite
+FOR EACH ROW
+BEGIN
+    UPDATE Utilisateur
+    SET nb_touites = nb_touites + 1
+    WHERE id_user = NEW.id_auteur;
+END //
+
+DELIMITER ;
+
+-- Empêcher un utilisateur de se suivre : 
+
+
+DELIMITER //
+
+CREATE TRIGGER trg_verif_suivi
+BEFORE INSERT ON UserSuivi
+FOR EACH ROW
+BEGIN
+    DECLARE email_suiveur VARCHAR(128);
+    DECLARE email_suivi VARCHAR(128);
+
+    IF NEW.id_suiveur = NEW.id_suivi THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Un utilisateur ne peut pas se suivre lui-meme';
+    END IF;
+
+    SELECT email_user INTO email_suiveur
+    FROM Utilisateur
+    WHERE id_user = NEW.id_suiveur;
+
+    SELECT email_user INTO email_suivi
+    FROM Utilisateur
+    WHERE id_user = NEW.id_suivi;
+
+    IF LOWER(TRIM(email_suiveur)) = LOWER(TRIM(email_suivi)) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Un utilisateur ne peut pas suivre quelqu''un ayant le meme email.';
+    END IF;
+END //
+
+DELIMITER ;
+
+-- Empêcher la modification de l'auteur d'un touite : 
+
+DELIMITER //
+
+CREATE TRIGGER trg_verif_auteur_touite
+BEFORE UPDATE ON Touite
+FOR EACH ROW
+BEGIN
+    IF OLD.id_auteur <> NEW.id_auteur THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Impossible de modifier l''auteur d''un touite';
+    END IF;
+END //
+
+DELIMITER ;
+
+
+-- Limiter un utilisateur à un maximum de 50 touites par jour : 
+
+DELIMITER //
+
+CREATE TRIGGER trg_limite_touites_jour
+BEFORE INSERT ON Touite
+FOR EACH ROW
+BEGIN
+    DECLARE nb_touites_jour INT;
+
+    SELECT COUNT(*) INTO nb_touites_jour
+    FROM Touite
+    WHERE id_auteur = NEW.id_auteur
+      AND DATE(date_publi) = DATE(NEW.date_publi);
+
+    IF nb_touites_jour >= 50 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Limite de 50 touites par jour atteinte pour cet utilisateur';
+    END IF;
+END //
+
+DELIMITER ;
