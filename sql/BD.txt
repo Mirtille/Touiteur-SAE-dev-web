@@ -1,4 +1,4 @@
-
+/*
 -- Dictionnaire des donnees : Touiteur 
 
 id_user : INT, identifiant unique de l'utilisateur (cle primaire, auto_increment)
@@ -81,7 +81,7 @@ Evaluation (#id_user, #id_touite, valeur_eval)
 
 
 -- script SQL 
-
+*/
 SET NAMES utf8mb4;
 SET foreign_key_checks = 0;
 
@@ -250,13 +250,11 @@ BEGIN
     DECLARE email_suiveur VARCHAR(128);
     DECLARE email_suivi VARCHAR(128);
 
-    -- Vérifier que l'utilisateur ne se suit pas lui-même
     IF NEW.id_suiveur = NEW.id_suivi THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Un utilisateur ne peut pas se suivre lui-même';
+        SET MESSAGE_TEXT = 'Un utilisateur ne peut pas se suivre lui-meme';
     END IF;
 
-    -- Récupérer les emails des deux utilisateurs
     SELECT email_user INTO email_suiveur
     FROM Utilisateur
     WHERE id_user = NEW.id_suiveur;
@@ -265,12 +263,10 @@ BEGIN
     FROM Utilisateur
     WHERE id_user = NEW.id_suivi;
 
-    -- Vérifier que les emails sont différents
     IF LOWER(TRIM(email_suiveur)) = LOWER(TRIM(email_suivi)) THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Un utilisateur ne peut pas suivre quelqu'un ayant le même email.';
+        SET MESSAGE_TEXT = 'Un utilisateur ne peut pas suivre quelqu''un ayant le meme email.';
     END IF;
-
 END //
 
 DELIMITER ;
