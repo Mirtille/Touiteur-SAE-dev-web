@@ -13,7 +13,7 @@ class Tag {
         $this->description = $description;
     }
 
-    public function getId() : ?int {
-        return $this->id;
+    public function __get(string $name): mixed {
+        return $this->$name ?? null;
     }
 }
