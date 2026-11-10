@@ -1,6 +1,6 @@
 <?php
 
-namespace Touiteur\Model;
+namespace iutnc\touiteur\touiteur;
 
 class Utilisateur {
     private ?int $id;
@@ -29,35 +29,11 @@ class Utilisateur {
         $this->nbTouites = $nbTouites;
     }
 
-    public function getId() : ?int {
-        return $this->id;
+public function __get(string $name): mixed {
+        return $this->$name ?? null;
     }
 
-    public function getNom() : string {
-        return $this->nom;
-    }
-
-    public function getPrenom() : string {
-        return $this->prenom;
-    }
-
-    public function getEmail() : string {
-        return $this->email;
-    }
-
-    public function getRole() : string {
-        return $this->role;
-    }
-
-    public function getNbTouites() : int {
-        return $this->nbTouites;
-    }
-
-    public function getMotDePasse() : string {
-        return $this->motDePasse;
-    }
-
-    public function estAdmin() : bool {
-        return $this->role === 'admin';
+    public function getNomComplet(): string {
+        return "{$this->prenom} {$this->nom}";
     }
 }
