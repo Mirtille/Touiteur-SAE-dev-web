@@ -12,7 +12,7 @@ class TouiteRenderer implements Renderer {
 
     private function formatTexteAvecTags(string $texteEchappe): string {
         return preg_replace_callback(
-            '/#([a-zA-Z0-9_àâäéèêëïîôöùûüçÀÂÄÉÈÊËÏÎÔÖÙÛÜÇ-]+)/u',
+            '/(?<!&)#([a-zA-Z0-9_àâäéèêëïîôöùûüçÀÂÄÉÈÊËÏÎÔÖÙÛÜÇ-]+)/u',
             function (array $matches): string {
                 $tag = $matches[1];
                 $tagUrl = urlencode($tag);
