@@ -7,6 +7,8 @@ use iutnc\touiteur\action\AfficherListeTouitesAction;
 use iutnc\touiteur\action\AfficherTouiteAction;
 use iutnc\touiteur\action\AfficherTouitesAuteurAction;
 use iutnc\touiteur\action\AfficherTouitesTagAction;
+use iutnc\touiteur\action\SuivreUtilisateurAction;
+use iutnc\touiteur\action\AbonnerTagAction;
 
 class Dispatcher {
 
@@ -34,6 +36,14 @@ class Dispatcher {
 
             case 'touites-tag':
                 $action = new AfficherTouitesTagAction();
+                break;
+
+            case 'suivre':
+                $action = new SuivreUtilisateurAction();
+                break;
+
+            case 'abonner-tag':
+                $action = new AbonnerTagAction();
                 break;
 
             default:
