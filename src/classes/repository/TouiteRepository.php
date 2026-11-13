@@ -152,4 +152,14 @@ class TouiteRepository {
             'idTag'  => $idTag
         ]);
     }
+
+    public function getInfluenceurs(): array {
+        $sql = "SELECT u.id_user, u.nom_user, u.prenom_user, COUNT(us.id_suiveur) AS nb_suiveurs
+                FROM Utilisateur u
+                LEFT JOIN UserSuivi us ON u.id_user = us.id_suivi
+                GROUP BY u.id_user, u.nom_user, u.prenom_user
+                ORDER BY nb_suiveurs ASC";
+        $stmt = $this->pdo->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
