@@ -5,6 +5,16 @@ require_once __DIR__ . '/vendor/autoload.php';
 use iutnc\touiteur\repository\Connexion;
 use iutnc\touiteur\dispatch\Dispatcher;
 
+if (!isset($_SESSION['user'])) {
+    $_SESSION['user'] = [
+        'id_user' => 1,
+        'nom_user' => 'Dupont',
+        'prenom_user' => 'Alice',
+        'email_user' => 'alice@touiteur.fr',
+        'role_user' => 'admin'
+    ];
+}
+
 try {
 
     Connexion::setConfig(__DIR__ . '/config.db.ini');
