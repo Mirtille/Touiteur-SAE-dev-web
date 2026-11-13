@@ -117,4 +117,16 @@ class TouiteRepository {
         ]);
         return (int) $stmt->fetchColumn() > 0;
     }
+
+    public function suivreUtilisateur(int $idSuiveur, int $idSuivi): bool {
+        if ($idSuiveur === $idSuivi) {
+            return false;
+        }
+        $sql = "INSERT IGNORE INTO UserSuivi (id_suiveur, id_suivi) VALUES (:suiveur, :suivi)";
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute([
+            'suiveur' => $idSuiveur,
+            'suivi'   => $idSuivi
+        ]);
+    }
 }
