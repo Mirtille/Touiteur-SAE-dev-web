@@ -12,6 +12,7 @@ use iutnc\touiteur\action\AbonnerTagAction;
 use iutnc\touiteur\action\AfficherInfluenceursAction;
 use iutnc\touiteur\action\PublierTouiteAction;
 use iutnc\touiteur\action\AfficherMurAction;
+use iutnc\touiteur\action\AfficherSuiveursAction;
 
 class Dispatcher {
 
@@ -53,15 +54,19 @@ class Dispatcher {
                 break;
 
             case 'influenceurs':
-             $action = new AfficherInfluenceursAction();
-             break;
+                $action = new AfficherInfluenceursAction();
+                break;
 
             case 'publier':
-             $action = new PublierTouiteAction();
-             break;
+                $action = new PublierTouiteAction();
+                break;
 
             case 'mur':
                 $action = new AfficherMurAction();
+                break;
+
+            case 'suiveurs':
+                $action = new AfficherSuiveursAction();
                 break;
 
             default:
@@ -102,6 +107,7 @@ class Dispatcher {
                     <a href="index.php?action=mur">Mon mur</a>
                     <a href="index.php?action=publier">Publier un touite</a>
                     <a href="index.php?action=liste">Tous les touites</a>
+                    <a href="index.php?action=suiveurs">Mes abonnés</a>
                     $lienAdmin
                 </nav>
             </header>
