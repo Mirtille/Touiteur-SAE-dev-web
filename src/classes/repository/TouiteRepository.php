@@ -107,4 +107,49 @@ class TouiteRepository {
         }
         return $touites;
     }
+
+    public function estSuivi(int $idSuiveur, int $idSuivi): bool {
+        $sql = "SELECT COUNT(*) FROM UserSuivi WHERE id_suiveur = :suiveur AND id_suivi = :suivi";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            'suiveur' => $idSuiveur,
+            'suivi'   => $idSuivi
+        ]);
+        return (int) $stmt->fetchColumn() > 0;
+    }
+
+    public function suivreUtilisateur(int $idSuiveur, int $idSuivi): bool {
+        if ($idSuiveur === $idSuivi) {
+            return false;
+        }
+        $sql = "INSERT IGNORE INTO UserSuivi (id_suiveur, id_suivi) VALUES (:suiveur, :suivi)";
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute([
+            'suiveur' => $idSuiveur,
+            'suivi'   => $idSuivi
+        ]);
+    }
+
+    public function abonnerTag(int $idUser, string $libelleTag): bool {
+        $libellePropre = mb_strtolower(ltrim(trim($libelleTag), '#'), 'UTF-8');
+        if ($libellePropre === '') {
+            return false;
+        }
+
+        $stmt = $this->pdo->prepare("SELECT id_tag FROM Tag WHERE libelle_tag = :libelle");
+        $stmt->execute(['libelle' => $libellePropre]);
+        $idTag = $stmt->fetchColumn();
+
+        if (!$idTag) {
+            $insertTag = $this->pdo->prepare("INSERT INTO Tag (libelle_tag) VALUES (:libelle)");
+            $insertTag->execute(['libelle' => $libellePropre]);
+            $idTag = (int) $this->pdo->lastInsertId();
+        }
+
+        $insertAbonnement = $this->pdo->prepare("INSERT IGNORE INTO UserTag (id_user, id_tag) VALUES (:idUser, :idTag)");
+        return $insertAbonnement->execute([
+            'idUser' => $idUser,
+            'idTag'  => $idTag
+        ]);
+    }
 }
