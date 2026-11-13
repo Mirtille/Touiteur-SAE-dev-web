@@ -13,6 +13,7 @@ use iutnc\touiteur\action\AfficherInfluenceursAction;
 use iutnc\touiteur\action\PublierTouiteAction;
 use iutnc\touiteur\action\AfficherMurAction;
 use iutnc\touiteur\action\AfficherSuiveursAction;
+use iutnc\touiteur\action\EvaluerAction;
 
 class Dispatcher {
 
@@ -67,6 +68,10 @@ class Dispatcher {
 
             case 'suiveurs':
                 $action = new AfficherSuiveursAction();
+                break;
+
+            case 'evaluation':
+                $action = new EvaluerAction();
                 break;
 
             default:
