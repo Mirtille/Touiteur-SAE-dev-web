@@ -129,4 +129,27 @@ class TouiteRepository {
             'suivi'   => $idSuivi
         ]);
     }
+
+    public function abonnerTag(int $idUser, string $libelleTag): bool {
+        $libellePropre = mb_strtolower(ltrim(trim($libelleTag), '#'), 'UTF-8');
+        if ($libellePropre === '') {
+            return false;
+        }
+
+        $stmt = $this->pdo->prepare("SELECT id_tag FROM Tag WHERE libelle_tag = :libelle");
+        $stmt->execute(['libelle' => $libellePropre]);
+        $idTag = $stmt->fetchColumn();
+
+        if (!$idTag) {
+            $insertTag = $this->pdo->prepare("INSERT INTO Tag (libelle_tag) VALUES (:libelle)");
+            $insertTag->execute(['libelle' => $libellePropre]);
+            $idTag = (int) $this->pdo->lastInsertId();
+        }
+
+        $insertAbonnement = $this->pdo->prepare("INSERT IGNORE INTO UserTag (id_user, id_tag) VALUES (:idUser, :idTag)");
+        return $insertAbonnement->execute([
+            'idUser' => $idUser,
+            'idTag'  => $idTag
+        ]);
+    }
 }
