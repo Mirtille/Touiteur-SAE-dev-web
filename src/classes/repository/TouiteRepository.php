@@ -283,14 +283,86 @@ class TouiteRepository {
     }
 
     public function getSuiveurs(int $idUser): array {
-            $sql = "SELECT u.id_user, u.nom_user, u.prenom_user
-                    FROM Utilisateur u
-                    JOIN UserSuivi us ON u.id_user = us.id_suiveur
-                    WHERE us.id_suivi = :idUser
-                    ORDER BY u.nom_user ASC, u.prenom_user ASC";
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute(['idUser' => $idUser]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        }
+        $sql = "SELECT u.id_user, u.nom_user, u.prenom_user
+                FROM Utilisateur u
+                JOIN UserSuivi us ON u.id_user = us.id_suiveur
+                WHERE us.id_suivi = :idUser
+                ORDER BY u.nom_user ASC, u.prenom_user ASC";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['idUser' => $idUser]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
+    public function getEvaluationUtilisateur(int $idUser, int $idTouite): ?int {
+        $sql = "SELECT valeur_eval
+                FROM Evaluation
+                WHERE id_user = :idUser
+                AND id_touite = :idTouite";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            'idUser' => $idUser,
+            'idTouite' => $idTouite
+        ]);
+
+        $resultat = $stmt->fetchColumn();
+        return $resultat === false ? null : (int) $resultat;
+    }
+
+    public function evaluerTouite(int $idUser, int $idTouite, int $valeur): bool {
+        if ($idUser <= 0 || $idTouite <= 0 || !in_array($valeur, [-1, 1], true)) {
+            return false;
+        }
+        try {
+            $this->pdo->beginTransaction();
+
+            $sql = "INSERT INTO Evaluation (id_user, id_touite, valeur_eval)
+                    VALUES (:idUser, :idTouite, :valeur)";
+
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([
+                'idUser' => $idUser,
+                'idTouite' => $idTouite,
+                'valeur' => $valeur
+            ]);
+
+            $sqlScore = "UPDATE Touite
+                        SET score_touite = score_touite + :valeur
+                        WHERE id_touite = :idTouite";
+
+            $stmtScore = $this->pdo->prepare($sqlScore);
+            $stmtScore->execute([
+                'valeur' => $valeur,
+                'idTouite' => $idTouite
+            ]);
+
+            if ($stmtScore->rowCount() === 0) {
+                throw new \RuntimeException("Touite introuvable.");
+            }
+            $this->pdo->commit();
+            return true;
+        } catch (\PDOException $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            } if ($e->getCode() === '23000') {
+                return false;
+            }
+            throw $e;
+
+        } catch (\Throwable $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $e;
+        }
+    }
+
+
+    public function getScoreTouite(int $idTouite): ?int {
+        $sql = "SELECT score_touite FROM Touite WHERE id_touite = :id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['id' => $idTouite]);
+        $score = $stmt->fetchColumn();
+        return $score === false ? null : (int) $score;
+    }
 }

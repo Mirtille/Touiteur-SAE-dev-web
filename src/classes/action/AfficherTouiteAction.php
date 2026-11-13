@@ -38,6 +38,50 @@ class AfficherTouiteAction extends Action {
             }
         }
 
+
+        if (isset($_SESSION['user']['id_user'])) {
+            $idUser = (int) $_SESSION['user']['id_user'];
+            if (!isset($_SESSION['csrf_token'])) {
+                $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+            }
+
+            $token = htmlspecialchars(
+                $_SESSION['csrf_token'],
+                ENT_QUOTES,
+                'UTF-8'
+            );
+
+            $evaluation = $repository->getEvaluationUtilisateur(
+                $idUser,
+                $id
+            );
+
+            if ($evaluation === null) {
+                $html .= <<<HTML
+                <section class="evaluation">
+                    <h3>Que pensez-vous de ce touite ?</h3>
+
+                    <form method="POST" action="index.php?action=evaluation">
+                        <input type="hidden" name="id_touite" value="$id">
+                        <input type="hidden" name="csrf_token" value="$token">
+
+                        <button type="submit" name="valeur" value="1">
+                            Like
+                        </button>
+
+                        <button type="submit" name="valeur" value="-1">
+                            Dislike
+                        </button>
+                    </form>
+                </section>
+                HTML;
+
+            } else {
+                $message = $evaluation === 1 ? "Vous avez liké ce touite." : "Vous avez disliké ce touite.";
+                $html .= "<p><em>$message Vous ne pouvez voter qu'une seule fois.</em></p>";
+            }
+        }
+
         return $html;
     }
 }
