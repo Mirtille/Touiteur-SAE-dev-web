@@ -24,5 +24,20 @@ class AfficherTouiteAction extends Action {
 
         $renderer = new TouiteRenderer($touite);
         return $renderer->render(Renderer::LONG);
+
+        if (isset($_SESSION['user']['id_user'])) {
+            $idConnecte = (int) $_SESSION['user']['id_user'];
+            $idAuteur = (int) $touite->idAuteur;
+
+            if ($idConnecte !== $idAuteur) {
+                if ($repository->estSuivi($idConnecte, $idAuteur)) {
+                    $html .= "<p><em>Vous suivez déjà cet auteur.</em></p>";
+                } else {
+                    $html .= "<p><a href='index.php?action=suivre&id=$idAuteur'>Suivre cet auteur</a></p>";
+                }
+            }
+        }
+
+        return $html;
     }
 }
