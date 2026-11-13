@@ -57,4 +57,54 @@ class TouiteRepository {
             $nomComplet
         );
     }
+
+    public function getTouitesParAuteur(int $idAuteur): array {
+        $sql = "SELECT t.*, u.nom_user, u.prenom_user 
+                FROM Touite t
+                JOIN Utilisateur u ON t.id_auteur = u.id_user
+                WHERE t.id_auteur = :idAuteur
+                ORDER BY t.date_publi DESC";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['idAuteur' => $idAuteur]);
+
+        $touites = [];
+        while ($row = $stmt->fetch()) {
+            $nomComplet = $row['prenom_user'] . ' ' . $row['nom_user'];
+            $touites[] = new Touite(
+                (int) $row['id_touite'],
+                $row['texte_touite'],
+                $row['date_publi'],
+                (int) $row['score_touite'],
+                (int) $row['id_auteur'],
+                $nomComplet
+            );
+        }
+        return $touites;
+    }
+
+    public function getTouitesParTag(string $libelleTag): array {
+        $sql = "SELECT t.*, u.nom_user, u.prenom_user 
+                FROM Touite t
+                JOIN Utilisateur u ON t.id_auteur = u.id_user
+                JOIN Touite2Tag t2t ON t.id_touite = t2t.id_touite
+                JOIN Tag tag ON t2t.id_tag = tag.id_tag
+                WHERE tag.libelle_tag = :libelleTag
+                ORDER BY t.date_publi DESC";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['libelleTag' => $libelleTag]);
+
+        $touites = [];
+        while ($row = $stmt->fetch()) {
+            $nomComplet = $row['prenom_user'] . ' ' . $row['nom_user'];
+            $touites[] = new Touite(
+                (int) $row['id_touite'],
+                $row['texte_touite'],
+                $row['date_publi'],
+                (int) $row['score_touite'],
+                (int) $row['id_auteur'],
+                $nomComplet
+            );
+        }
+        return $touites;
+    }
 }
