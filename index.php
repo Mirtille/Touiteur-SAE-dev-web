@@ -7,7 +7,7 @@ use iutnc\touiteur\dispatch\Dispatcher;
 
 try {
 
-    Connexion::setConfig(__DIR__ . '/config/db.ini');
+    Connexion::setConfig(__DIR__ . '/config.db.ini');
     $dispatcher = new Dispatcher();
     $dispatcher->run();
 

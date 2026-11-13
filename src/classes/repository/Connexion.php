@@ -13,7 +13,8 @@ class Connexion {
             throw new Exception("Impossible de lire le fichier de configuration : $file");
         }
 
-        $dsn = "{$conf['driver']}:host={$conf['host']};dbname={$conf['database']};charset={$conf['charset']}";
+        $charset = $conf['charset'] ?? 'utf8mb4';
+        $dsn = "{$conf['driver']}:host={$conf['host']};dbname={$conf['database']};charset={$charset}";
         self::$pdo = new PDO($dsn, $conf['username'], $conf['password'], [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
