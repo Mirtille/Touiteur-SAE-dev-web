@@ -23,7 +23,7 @@ class AfficherTouiteAction extends Action {
         }
 
         $renderer = new TouiteRenderer($touite);
-        return $renderer->render(Renderer::LONG);
+        $renderer->render(Renderer::LONG);
 
         if (isset($_SESSION['user']['id_user'])) {
             $idConnecte = (int) $_SESSION['user']['id_user'];
