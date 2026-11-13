@@ -11,6 +11,7 @@ use iutnc\touiteur\action\SuivreUtilisateurAction;
 use iutnc\touiteur\action\AbonnerTagAction;
 use iutnc\touiteur\action\AfficherInfluenceursAction;
 use iutnc\touiteur\action\PublierTouiteAction;
+use iutnc\touiteur\action\AfficherMurAction;
 
 class Dispatcher {
 
@@ -23,8 +24,11 @@ class Dispatcher {
     public function run() : void {
 
         switch ($this->action) {
-            case 'liste':
             case 'default':
+                $action = isset($_SESSION['user']) ? new AfficherMurAction() : new AfficherListeTouitesAction();
+                break;
+
+            case 'liste':
                 $action = new AfficherListeTouitesAction();
                 break;
 
@@ -55,6 +59,10 @@ class Dispatcher {
             case 'publier':
              $action = new PublierTouiteAction();
              break;
+
+            case 'mur':
+                $action = new AfficherMurAction();
+                break;
 
             default:
                 http_response_code(404);
@@ -91,7 +99,9 @@ class Dispatcher {
                 <nav>
                     <a href="index.php">Accueil</a>
                     <a href="index.php?action=abonner-tag">S'abonner à un tag</a>
+                    <a href="index.php?action=mur">Mon mur</a>
                     <a href="index.php?action=publier">Publier un touite</a>
+                    <a href="index.php?action=liste">Tous les touites</a>
                     $lienAdmin
                 </nav>
             </header>

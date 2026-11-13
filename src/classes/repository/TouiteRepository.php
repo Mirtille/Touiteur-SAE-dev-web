@@ -251,4 +251,35 @@ class TouiteRepository {
         }
     }
 
+    public function getMurUtilisateur(int $idUser): array {
+     $sql = "SELECT DISTINCT t.*, u.nom_user, u.prenom_user
+             FROM Touite t
+             JOIN Utilisateur u ON t.id_auteur = u.id_user
+             LEFT JOIN UserSuivi us ON t.id_auteur = us.id_suivi AND us.id_suiveur = :idUser1
+             LEFT JOIN Touite2Tag t2t ON t.id_touite = t2t.id_touite
+             LEFT JOIN UserTag ut ON t2t.id_tag = ut.id_tag AND ut.id_user = :idUser2
+             WHERE us.id_suiveur IS NOT NULL OR ut.id_user IS NOT NULL
+             ORDER BY t.date_publi DESC";
+
+     $stmt = $this->pdo->prepare($sql);
+     $stmt->execute([
+         'idUser1' => $idUser,
+         'idUser2' => $idUser
+     ]);
+
+     $touites = [];
+     while ($row = $stmt->fetch()) {
+         $nomComplet = $row['prenom_user'] . ' ' . $row['nom_user'];
+         $touites[] = new Touite(
+             (int) $row['id_touite'],
+             $row['texte_touite'],
+             $row['date_publi'],
+             (int) $row['score_touite'],
+             (int) $row['id_auteur'],
+             $nomComplet
+         );
+     }
+     return $touites;
+ }
+
 }
