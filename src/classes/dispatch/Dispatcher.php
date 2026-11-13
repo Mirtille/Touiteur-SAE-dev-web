@@ -4,6 +4,7 @@ namespace iutnc\touiteur\dispatch;
 
 use iutnc\touiteur\action\Action;
 use iutnc\touiteur\action\AfficherListeTouitesAction;
+use iutnc\touiteur\action\AfficherTouiteAction;
 
 class Dispatcher {
 
@@ -19,6 +20,10 @@ class Dispatcher {
             case 'liste':
             case 'default':
                 $action = new AfficherListeTouitesAction();
+                break;
+
+            case 'detail':
+                $action = new AfficherTouiteAction();
                 break;
 
             default:
