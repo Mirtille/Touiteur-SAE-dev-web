@@ -5,6 +5,8 @@ namespace iutnc\touiteur\dispatch;
 use iutnc\touiteur\action\Action;
 use iutnc\touiteur\action\AfficherListeTouitesAction;
 use iutnc\touiteur\action\AfficherTouiteAction;
+use iutnc\touiteur\action\AfficherTouitesAuteurAction;
+use iutnc\touiteur\action\AfficherTouitesTagAction;
 
 class Dispatcher {
 
@@ -24,6 +26,14 @@ class Dispatcher {
 
             case 'detail':
                 $action = new AfficherTouiteAction();
+                break;
+
+            case 'touites-auteur':
+                $action = new AfficherTouitesAuteurAction();
+                break;
+
+            case 'touites-tag':
+                $action = new AfficherTouitesTagAction();
                 break;
 
             default:
