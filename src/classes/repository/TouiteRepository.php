@@ -32,4 +32,29 @@ class TouiteRepository {
         }
         return $touites;
     }
+
+    public function getTouiteById(int $id): ?Touite {
+        $sql = "SELECT t.*, u.nom_user, u.prenom_user 
+                FROM Touite t
+                JOIN Utilisateur u ON t.id_auteur = u.id_user
+                WHERE t.id_touite = :id";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['id' => $id]);
+        $row = $stmt->fetch();
+
+        if (!$row) {
+            return null;
+        }
+
+        $nomComplet = $row['prenom_user'] . ' ' . $row['nom_user'];
+        return new Touite(
+            (int) $row['id_touite'],
+            $row['texte_touite'],
+            $row['date_publi'],
+            (int) $row['score_touite'],
+            (int) $row['id_auteur'],
+            $nomComplet
+        );
+    }
 }
