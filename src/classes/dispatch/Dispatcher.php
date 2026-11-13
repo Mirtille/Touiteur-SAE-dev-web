@@ -76,6 +76,7 @@ class Dispatcher {
 
                 <nav>
                     <a href="index.php">Accueil</a>
+                    <a href="index.php?action=abonner-tag">S'abonner à un tag</a>
                 </nav>
             </header>
 
