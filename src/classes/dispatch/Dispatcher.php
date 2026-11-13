@@ -9,6 +9,7 @@ use iutnc\touiteur\action\AfficherTouitesAuteurAction;
 use iutnc\touiteur\action\AfficherTouitesTagAction;
 use iutnc\touiteur\action\SuivreUtilisateurAction;
 use iutnc\touiteur\action\AbonnerTagAction;
+use iutnc\touiteur\action\AfficherInfluenceursAction;
 
 class Dispatcher {
 
@@ -46,6 +47,10 @@ class Dispatcher {
                 $action = new AbonnerTagAction();
                 break;
 
+            case 'influenceurs':
+             $action = new AfficherInfluenceursAction();
+             break;
+
             default:
                 http_response_code(404);
                 $html = "<h2>Erreur 404</h2><p>Action inconnue.</p>";
@@ -58,6 +63,10 @@ class Dispatcher {
     }
 
     private function renderPage(string $html) : void {
+        $lienAdmin = '';
+        if (($_SESSION['user']['role_user'] ?? '') === 'admin') {
+            $lienAdmin = '<a href="index.php?action=influenceurs">Influenceurs (Admin)</a>';
+        }
         echo <<<HTML
         <!DOCTYPE html>
         <html lang="fr">
@@ -77,6 +86,7 @@ class Dispatcher {
                 <nav>
                     <a href="index.php">Accueil</a>
                     <a href="index.php?action=abonner-tag">S'abonner à un tag</a>
+                    $lienAdmin
                 </nav>
             </header>
 
