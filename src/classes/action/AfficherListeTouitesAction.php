@@ -3,6 +3,8 @@
 namespace iutnc\touiteur\action;
 
 use iutnc\touiteur\repository\TouiteRepository;
+use iutnc\touiteur\render\TouiteRenderer;
+use iutnc\touiteur\render\Renderer;
 
 class AfficherListeTouitesAction extends Action {
 
@@ -10,8 +12,17 @@ class AfficherListeTouitesAction extends Action {
         $repository = new TouiteRepository();
         $touites = $repository->getDerniersTouites();
 
-        ob_start();
-        require __DIR__ . '/../../../vues/liste.php';
-        return ob_get_clean();
+        $html = "<h2>Les derniers touites</h2>";
+
+        if (empty($touites)) {
+            $html .= "<p>Aucun touite publié pour le moment.</p>";
+        } else {
+            foreach ($touites as $touite) {
+                $renderer = new TouiteRenderer($touite);
+                $html .= $renderer->render(Renderer::COMPACT);
+            }
+        }
+
+        return $html;
     }
 }
