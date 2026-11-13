@@ -107,4 +107,14 @@ class TouiteRepository {
         }
         return $touites;
     }
+
+    public function estSuivi(int $idSuiveur, int $idSuivi): bool {
+        $sql = "SELECT COUNT(*) FROM UserSuivi WHERE id_suiveur = :suiveur AND id_suivi = :suivi";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            'suiveur' => $idSuiveur,
+            'suivi'   => $idSuivi
+        ]);
+        return (int) $stmt->fetchColumn() > 0;
+    }
 }
