@@ -5,6 +5,8 @@ require_once __DIR__ . '/vendor/autoload.php';
 use iutnc\touiteur\repository\Connexion;
 use iutnc\touiteur\dispatch\Dispatcher;
 
+session_start();
+
 if (!isset($_SESSION['user'])) {
     $_SESSION['user'] = [
         'id_user' => 1,

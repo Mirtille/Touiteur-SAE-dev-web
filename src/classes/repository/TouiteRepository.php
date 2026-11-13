@@ -162,4 +162,93 @@ class TouiteRepository {
         $stmt = $this->pdo->query($sql);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+
+    private function extraireTags(string $texte): array {
+        preg_match_all(
+            '/#([a-zA-Z0-9_àâäéèêëïîôöùûüçÀÂÄÉÈÊËÏÎÔÖÙÛÜÇ-]+)/u',
+            $texte,
+            $matches
+        );
+
+        $tags = [];
+
+        foreach ($matches[1] as $tag) {
+            $tag = mb_strtolower($tag, 'UTF-8');
+
+            if (mb_strlen($tag, 'UTF-8') > 50) {
+                throw new \InvalidArgumentException("Un tag ne peut pas dépasser 50 caractères.");
+            }
+            $tags[] = $tag;
+        }
+        return array_unique($tags);
+    }
+
+    public function publierTouite(string $texte, int $idAuteur): int {
+
+        $texte = trim($texte);
+
+        if ($texte === '') {
+            throw new \InvalidArgumentException(
+                "Le touite ne doit pas être vide."
+            );
+        }
+
+        if (mb_strlen($texte, 'UTF-8') > 235) {
+            throw new \InvalidArgumentException(
+                "Le touite ne peut pas dépasser 235 caractères."
+            );
+        }
+
+        if ($idAuteur <= 0) {
+            throw new \InvalidArgumentException(
+                "Auteur invalide."
+            );
+        }
+
+        $tags = $this->extraireTags($texte);
+
+        try {
+            $this->pdo->beginTransaction();
+
+            $sql = "INSERT INTO Touite (texte_touite, id_auteur)
+                    VALUES (:texte, :idAuteur)";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([
+                'texte' => $texte,
+                'idAuteur' => $idAuteur
+            ]);
+
+            $idTouite = (int) $this->pdo->lastInsertId();
+
+
+            foreach ($tags as $libelle) {
+                $sqlTag = "INSERT INTO Tag (libelle_tag)
+                        VALUES (:libelle)
+                        ON DUPLICATE KEY UPDATE
+                        id_tag = LAST_INSERT_ID(id_tag)";
+
+                $stmtTag = $this->pdo->prepare($sqlTag);
+                $stmtTag->execute(['libelle' => $libelle]);
+
+                $idTag = (int) $this->pdo->lastInsertId();
+                $sqlAssociation = "
+                INSERT IGNORE INTO Touite2Tag (id_touite, id_tag) VALUES (:idTouite, :idTag)";
+                $stmtAssociation = $this->pdo->prepare($sqlAssociation);
+                $stmtAssociation->execute([
+                    'idTouite' => $idTouite,
+                    'idTag' => $idTag
+                ]);
+            }
+            $this->pdo->commit();
+            return $idTouite;
+
+        } catch (\Throwable $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $e;
+        }
+    }
+
 }

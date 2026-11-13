@@ -10,6 +10,7 @@ use iutnc\touiteur\action\AfficherTouitesTagAction;
 use iutnc\touiteur\action\SuivreUtilisateurAction;
 use iutnc\touiteur\action\AbonnerTagAction;
 use iutnc\touiteur\action\AfficherInfluenceursAction;
+use iutnc\touiteur\action\PublierTouiteAction;
 
 class Dispatcher {
 
@@ -51,6 +52,10 @@ class Dispatcher {
              $action = new AfficherInfluenceursAction();
              break;
 
+            case 'publier':
+             $action = new PublierTouiteAction();
+             break;
+
             default:
                 http_response_code(404);
                 $html = "<h2>Erreur 404</h2><p>Action inconnue.</p>";
@@ -86,6 +91,7 @@ class Dispatcher {
                 <nav>
                     <a href="index.php">Accueil</a>
                     <a href="index.php?action=abonner-tag">S'abonner à un tag</a>
+                    <a href="index.php?action=publier">Publier un touite</a>
                     $lienAdmin
                 </nav>
             </header>
